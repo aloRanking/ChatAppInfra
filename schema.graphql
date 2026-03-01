@@ -1,0 +1,36 @@
+type ChatRoom {
+  roomId: ID!
+  name: String!
+  createdAt: AWSDateTime!
+}
+
+type Message {
+  messageId: ID!
+  roomId: ID!
+  senderUserId: ID!   
+  senderUsername: String!
+  content: String!
+  createdAt: AWSDateTime!
+}
+
+type Query {
+  getRoom(roomId: ID!): ChatRoom
+  getMessages(roomId: ID!): [Message!]!
+  listRooms: [ChatRoom!]!
+}
+
+type Mutation {
+  createRoom(name: String!): ChatRoom!
+  sendMessage(roomId: ID!, content: String!): Message!
+}
+
+type Subscription {
+  onMessageSent(roomId: ID!): Message
+    @aws_subscribe(mutations: ["sendMessage"])
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}

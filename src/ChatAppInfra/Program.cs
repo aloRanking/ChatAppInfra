@@ -10,7 +10,20 @@ namespace ChatAppInfra
         public static void Main(string[] args)
         {
             var app = new App();
-            new ChatAppInfraStack(app, "ChatAppInfraStack", new StackProps
+            var environment = app.Node.TryGetContext("environment")?.ToString();
+
+            if (string.IsNullOrEmpty(environment))
+            {
+                throw new Exception("Environment not specified. Use -c environment=dev or prod");
+            }
+
+            if (environment != "dev" && environment != "prod")
+            {
+                throw new Exception("Invalid environment. Allowed values: dev, prod");
+            }
+
+            Console.WriteLine($"Deploying environment: {environment}");
+            new ChatAppInfraStack(app, $"ChatApp-{environment}", environment, new StackProps
             {
                 // If you don't specify 'env', this stack will be environment-agnostic.
                 // Account/Region-dependent features and context lookups will not work,
@@ -18,13 +31,19 @@ namespace ChatAppInfra
 
                 // Uncomment the next block to specialize this stack for the AWS Account
                 // and Region that are implied by the current CLI configuration.
-                /*
+
                 Env = new Amazon.CDK.Environment
                 {
                     Account = System.Environment.GetEnvironmentVariable("CDK_DEFAULT_ACCOUNT"),
                     Region = System.Environment.GetEnvironmentVariable("CDK_DEFAULT_REGION"),
+                },
+
+                Tags = new Dictionary<string, string>
+                {
+                    { "Environment", environment },
+                    { "Project", "ChatApp" }
                 }
-                */
+
 
                 // Uncomment the next block if you know exactly what Account and Region you
                 // want to deploy the stack to.
