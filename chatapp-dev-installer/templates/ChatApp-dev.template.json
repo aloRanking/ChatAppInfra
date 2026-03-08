@@ -1,0 +1,471 @@
+{
+ "Resources": {
+  "ChatUserPool04B192D3": {
+   "Type": "AWS::Cognito::UserPool",
+   "Properties": {
+    "AccountRecoverySetting": {
+     "RecoveryMechanisms": [
+      {
+       "Name": "verified_phone_number",
+       "Priority": 1
+      },
+      {
+       "Name": "verified_email",
+       "Priority": 2
+      }
+     ]
+    },
+    "AdminCreateUserConfig": {
+     "AllowAdminCreateUserOnly": false
+    },
+    "EmailVerificationMessage": "Thanks for signing up! Your verification code is {####}",
+    "EmailVerificationSubject": "Verify your ChatApp account",
+    "Policies": {
+     "PasswordPolicy": {
+      "MinimumLength": 8,
+      "RequireLowercase": true,
+      "RequireNumbers": true,
+      "RequireSymbols": false,
+      "RequireUppercase": true
+     }
+    },
+    "SmsVerificationMessage": "The verification code to your new account is {####}",
+    "UserPoolName": "chatapp-users-dev",
+    "VerificationMessageTemplate": {
+     "DefaultEmailOption": "CONFIRM_WITH_CODE",
+     "EmailMessage": "Thanks for signing up! Your verification code is {####}",
+     "EmailSubject": "Verify your ChatApp account",
+     "SmsMessage": "The verification code to your new account is {####}"
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatUserPool/Resource"
+   }
+  },
+  "ChatUserPoolChatAppClientE00C6C71": {
+   "Type": "AWS::Cognito::UserPoolClient",
+   "Properties": {
+    "AllowedOAuthFlows": [
+     "implicit",
+     "code"
+    ],
+    "AllowedOAuthFlowsUserPoolClient": true,
+    "AllowedOAuthScopes": [
+     "profile",
+     "phone",
+     "email",
+     "openid",
+     "aws.cognito.signin.user.admin"
+    ],
+    "CallbackURLs": [
+     "https://example.com"
+    ],
+    "ClientName": "chatapp-client-dev",
+    "ExplicitAuthFlows": [
+     "ALLOW_USER_PASSWORD_AUTH",
+     "ALLOW_USER_SRP_AUTH",
+     "ALLOW_REFRESH_TOKEN_AUTH"
+    ],
+    "GenerateSecret": false,
+    "SupportedIdentityProviders": [
+     "COGNITO"
+    ],
+    "UserPoolId": {
+     "Ref": "ChatUserPool04B192D3"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatUserPool/ChatAppClient/Resource"
+   }
+  },
+  "ChatApiD29796E1": {
+   "Type": "AWS::AppSync::GraphQLApi",
+   "Properties": {
+    "AuthenticationType": "AMAZON_COGNITO_USER_POOLS",
+    "Name": "chatapp-api-dev",
+    "UserPoolConfig": {
+     "AwsRegion": "eu-north-1",
+     "DefaultAction": "ALLOW",
+     "UserPoolId": {
+      "Ref": "ChatUserPool04B192D3"
+     }
+    },
+    "XrayEnabled": true
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/Resource"
+   }
+  },
+  "ChatApiSchema1E72BAA5": {
+   "Type": "AWS::AppSync::GraphQLSchema",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "Definition": "type ChatRoom {\n  roomId: ID!\n  name: String!\n  createdAt: AWSDateTime!\n}\n\ntype Message {\n  messageId: ID!\n  roomId: ID!\n  senderUserId: ID!   \n  senderUsername: String!\n  content: String!\n  createdAt: AWSDateTime!\n}\n\ntype Query {\n  getRoom(roomId: ID!): ChatRoom\n  getMessages(roomId: ID!): [Message!]!\n  listRooms: [ChatRoom!]!\n}\n\ntype Mutation {\n  createRoom(name: String!): ChatRoom!\n  sendMessage(roomId: ID!, content: String!): Message!\n}\n\ntype Subscription {\n  onMessageSent(roomId: ID!): Message\n    @aws_subscribe(mutations: [\"sendMessage\"])\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/Schema"
+   }
+  },
+  "ChatApiChatDataSourceServiceRole13CFCE07": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "appsync.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/ChatDataSource/ServiceRole/Resource"
+   }
+  },
+  "ChatApiChatDataSourceServiceRoleDefaultPolicy573F35BD": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ChatTable7A2D1C24",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ChatTable7A2D1C24",
+             "Arn"
+            ]
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ChatApiChatDataSourceServiceRoleDefaultPolicy573F35BD",
+    "Roles": [
+     {
+      "Ref": "ChatApiChatDataSourceServiceRole13CFCE07"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/ChatDataSource/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ChatApiChatDataSource59DCD97A": {
+   "Type": "AWS::AppSync::DataSource",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "Description": "Data source for chat rooms and messages",
+    "DynamoDBConfig": {
+     "AwsRegion": "eu-north-1",
+     "TableName": {
+      "Ref": "ChatTable7A2D1C24"
+     }
+    },
+    "Name": "ChatDataSourcedev",
+    "ServiceRoleArn": {
+     "Fn::GetAtt": [
+      "ChatApiChatDataSourceServiceRole13CFCE07",
+      "Arn"
+     ]
+    },
+    "Type": "AMAZON_DYNAMODB"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/ChatDataSource/Resource"
+   }
+  },
+  "ChatApiCreateRoomResolver4FA8CCFF": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "DataSourceName": "ChatDataSourcedev",
+    "FieldName": "createRoom",
+    "Kind": "UNIT",
+    "RequestMappingTemplate": "\n{\n  \"version\": \"2018-05-29\",\n  \"operation\": \"PutItem\",\n  \"key\": {\n    \"PK\": $util.dynamodb.toDynamoDBJson(\"ROOM#$util.autoId()\"),\n    \"SK\": $util.dynamodb.toDynamoDBJson(\"META\")\n  },\n  \"attributeValues\": {\n    \"EntityType\": { \"S\": \"Room\" },\n    \"name\": $util.dynamodb.toDynamoDBJson($ctx.args.name),\n    \"createdAt\": $util.dynamodb.toDynamoDBJson($util.time.nowISO8601())\n  }\n}\n",
+    "ResponseMappingTemplate": "\n#set($item = $ctx.result)\n{\n  \"roomId\": \"$item.PK.replace('ROOM#','')\",\n  \"name\": \"$item.name\",\n  \"createdAt\": \"$item.createdAt\"\n}\n",
+    "TypeName": "Mutation"
+   },
+   "DependsOn": [
+    "ChatApiChatDataSource59DCD97A",
+    "ChatApiSchema1E72BAA5"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/CreateRoomResolver/Resource"
+   }
+  },
+  "ChatApiListRoomsResolver7684FBCC": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "DataSourceName": "ChatDataSourcedev",
+    "FieldName": "listRooms",
+    "Kind": "UNIT",
+    "RequestMappingTemplate": "\n{\n  \"version\": \"2018-05-29\",\n  \"operation\": \"Query\",\n  \"index\": \"EntityType-createdAt-index\",\n  \"query\": {\n    \"expression\": \"EntityType = :entityType\",\n    \"expressionValues\": {\n      \":entityType\": $util.dynamodb.toDynamoDBJson(\"Room\")\n    }\n  },\n  \"scanIndexForward\": false\n}\n",
+    "ResponseMappingTemplate": "\n#set($items = $ctx.result.items)\n[\n#foreach($item in $items)\n  {\n    \"roomId\": \"$item.PK.replace('ROOM#','')\",\n    \"name\": \"$item.name\",\n    \"createdAt\": \"$item.createdAt\"\n  }#if($foreach.hasNext),#end\n#end\n]\n",
+    "TypeName": "Query"
+   },
+   "DependsOn": [
+    "ChatApiChatDataSource59DCD97A",
+    "ChatApiSchema1E72BAA5"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/ListRoomsResolver/Resource"
+   }
+  },
+  "ChatApiGetRoomResolver3C16F8C3": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "DataSourceName": "ChatDataSourcedev",
+    "FieldName": "getRoom",
+    "Kind": "UNIT",
+    "RequestMappingTemplate": "\n{\n  \"version\": \"2018-05-29\",\n  \"operation\": \"GetItem\",\n  \"key\": {\n    \"PK\": $util.dynamodb.toDynamoDBJson(\"ROOM#$ctx.args.roomId\"),\n    \"SK\": $util.dynamodb.toDynamoDBJson(\"META\")\n  }\n}\n",
+    "ResponseMappingTemplate": "\n#if($ctx.result)\n  {\n    \"roomId\": \"$ctx.result.PK.replace('ROOM#','')\",\n    \"name\": \"$ctx.result.name\",\n    \"createdAt\": \"$ctx.result.createdAt\"\n  }\n#else\n  $util.error(\"Room not found\")\n#end\n",
+    "TypeName": "Query"
+   },
+   "DependsOn": [
+    "ChatApiChatDataSource59DCD97A",
+    "ChatApiSchema1E72BAA5"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/GetRoomResolver/Resource"
+   }
+  },
+  "ChatApiSendMessageResolverEFF719B9": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "DataSourceName": "ChatDataSourcedev",
+    "FieldName": "sendMessage",
+    "Kind": "UNIT",
+    "RequestMappingTemplate": "\n#set($messageId = $util.autoId())\n#set($timestamp = $util.time.nowISO8601())\n{\n  \"version\": \"2018-05-29\",\n  \"operation\": \"PutItem\",\n  \"key\": {\n    \"PK\": $util.dynamodb.toDynamoDBJson(\"ROOM#$ctx.args.roomId\"),\n    \"SK\": $util.dynamodb.toDynamoDBJson(\"MSG#$timestamp#$messageId\")\n  },\n  \"attributeValues\": {\n    \"EntityType\": { \"S\": \"Message\" },\n    \"messageId\": { \"S\": \"$messageId\" },\n    \"roomId\": $util.dynamodb.toDynamoDBJson($ctx.args.roomId),\n    \"senderUserId\": $util.dynamodb.toDynamoDBJson($ctx.identity.sub),\n    \"senderUsername\": $util.dynamodb.toDynamoDBJson($ctx.identity.username),\n    \"content\": $util.dynamodb.toDynamoDBJson($ctx.args.content),\n    \"createdAt\": { \"S\": \"$timestamp\" }\n  }\n}\n",
+    "ResponseMappingTemplate": "\n\n{\n  \"messageId\": \"$util.autoId()\",\n  \"roomId\": \"$ctx.args.roomId\",\n  \"senderUserId\": \"$ctx.identity.sub\",\n  \"senderUsername\": \"$ctx.identity.username\",\n  \"content\": \"$ctx.args.content\",\n  \"createdAt\": \"$util.time.nowISO8601()\"\n}\n",
+    "TypeName": "Mutation"
+   },
+   "DependsOn": [
+    "ChatApiChatDataSource59DCD97A",
+    "ChatApiSchema1E72BAA5"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/SendMessageResolver/Resource"
+   }
+  },
+  "ChatApiGetMessagesResolver08F8BFB2": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "DataSourceName": "ChatDataSourcedev",
+    "FieldName": "getMessages",
+    "Kind": "UNIT",
+    "RequestMappingTemplate": "\n{\n  \"version\": \"2018-05-29\",\n  \"operation\": \"Query\",\n  \"query\": {\n    \"expression\": \"PK = :pk AND begins_with(SK, :sk)\",\n    \"expressionValues\": {\n      \":pk\": $util.dynamodb.toDynamoDBJson(\"ROOM#$ctx.args.roomId\"),\n      \":sk\": $util.dynamodb.toDynamoDBJson(\"MSG#\")\n    }\n  }\n}\n",
+    "ResponseMappingTemplate": "$util.toJson($ctx.result.items)",
+    "TypeName": "Query"
+   },
+   "DependsOn": [
+    "ChatApiChatDataSource59DCD97A",
+    "ChatApiSchema1E72BAA5"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/GetMessagesResolver/Resource"
+   }
+  },
+  "ChatTable7A2D1C24": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "PK",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "SK",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "EntityType",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "createdAt",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "EntityType-createdAt-index",
+      "KeySchema": [
+       {
+        "AttributeName": "EntityType",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "createdAt",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "PK",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "SK",
+      "KeyType": "RANGE"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": false
+    },
+    "TableName": "ChatTable-dev"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatTable/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/8VUXU/bMBT9LfgRpaEwCaFKewhth6p1rDQt0lQh5Nq37QXHNrZDyaL898luk6aD8TrlIfa5X+ce+/oivvhyFXdP6NZ2GH/uCFzGZeooe47o1j6WTK0lOhWXcwtmopRYlERTa7fK8IkSyArSK0mGcgxy7TakR05JRAy85GhggGt0lvScyaEBx2oLhlELf+FpkS2VsKS3osIe4LnWbffKGzL1SkVdnXCwzqiCRMSCWKW4lnM9lHQpgNclLK7lSCYCqQXrCecWjKTZIWm+b+82gKEJD92DwRUy6lBJHwcZRXGteLH3Cfs0Xz4BcwGqqoeov5K1WlG96AsE6RZlU2ifgOZu802obcNqshe3pu6x1OiG6BokGOogBWbANWrlR3WaLo7Z7IxVRLW2hWRxeWOo3ryIROOiJPLQumelDP4OffeVXOHa8+OworlwSdvq8SP3WaHbCoa6TYaj7quqinxOlLjLFILeDC2Ojq+KSkI5T9kGMjoADZKD9Ce/IKfk4b9Zg7JBwLtxorG120VEg0LSTA2WA+poqnLDwPu0dlOwSryC8XC9riKkWVxOlYBFSai1eQb8OgyZNigZaioSxlQuXX1WwccHJKyRsdqTn6lJHVXPy6Ksdq05R9lmJAVKaGxN358a/503iOK5RDvYxzTpZspb3lV5D3OeOuogA+lfj4bwB3CotytVRTwIzpdxOfPXZ1ES5/+tkV6iECjXPxT3yCT59TgZTh+nw7v5MJ2RiGiF0o3kDDOYAlOvYIpUAzt6Aj7waa5rGMZPnyhNjQu3/TuEQ20NndsNTkqqiFhl3Gceez1uhFpSkQJTklNTjCSHN68MQb9qNa6N8k/UYTyT8ZjU+gW1qircx/qa/sydzl0VDZS7BXd2FXfj88uz+HY46ysDidadezAWlfz6ehl3z87jrv9Onixix+TSYQbxdPf/A5xEt4VjBgAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "GraphqlEndpoint": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ChatApiD29796E1",
+     "GraphQLUrl"
+    ]
+   }
+  },
+  "UserPoolId": {
+   "Value": {
+    "Ref": "ChatUserPool04B192D3"
+   }
+  },
+  "UserPoolClientId": {
+   "Value": {
+    "Ref": "ChatUserPoolChatAppClientE00C6C71"
+   }
+  },
+  "Region": {
+   "Value": "eu-north-1"
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

@@ -36,39 +36,45 @@ namespace ChatAppInfra
             //         : RemovalPolicy.DESTROY);
 
 
-            var userPool = new UserPool(this, "ChatUserPool", new UserPoolProps
-            {
-                UserPoolName = $"chatapp-users-{EnvironmentName}",
+          var userPool = new UserPool(this, "ChatUserPool", new UserPoolProps
+{
+    UserPoolName = $"chatapp-users-{EnvironmentName}",
 
-                // Users sign in with username
-                SignInAliases = new SignInAliases
-                {
-                    Username = true
-                },
+    SignInAliases = new SignInAliases
+    {
+        Username = true
+    },
 
-                // Basic security defaults
-                SelfSignUpEnabled = true,
-                UserVerification = new UserVerificationConfig
-                {
-                    EmailSubject = "Verify your ChatApp account",
-                    EmailBody = "Thanks for signing up! Your verification code is {####}"
-                },
+    SelfSignUpEnabled = true,
 
-                PasswordPolicy = new PasswordPolicy
-                {
-                    MinLength = 8,
-                    RequireDigits = true,
-                    RequireLowercase = true,
-                    RequireUppercase = true,
-                    RequireSymbols = false
-                },
+    // Enable email verification
+    AutoVerify = new AutoVerifiedAttrs
+    {
+        Email = true
+    },
 
-                RemovalPolicy = isProd
-                    ? RemovalPolicy.RETAIN
-                    : RemovalPolicy.DESTROY
-            });
+    UserVerification = new UserVerificationConfig
+    {
+        EmailSubject = "Verify your ChatApp account",
+        EmailBody = "Your verification code is {####}"
+    },
 
+    // Needed for email-based recovery
+    AccountRecovery = AccountRecovery.EMAIL_ONLY,
 
+    PasswordPolicy = new PasswordPolicy
+    {
+        MinLength = 8,
+        RequireDigits = true,
+        RequireLowercase = true,
+        RequireUppercase = true,
+        RequireSymbols = false
+    },
+
+    RemovalPolicy = isProd
+        ? RemovalPolicy.RETAIN
+        : RemovalPolicy.DESTROY
+});
             var userPoolClient = userPool.AddClient("ChatAppClient", new UserPoolClientOptions
             {
                 UserPoolClientName = $"chatapp-client-{EnvironmentName}",
@@ -276,14 +282,14 @@ chatDs.CreateResolver("GetRoomResolver", new BaseResolverProps
 }
 "),
     ResponseMappingTemplate = MappingTemplate.FromString(@"
-#set($item = $ctx.result)
+
 {
-  ""messageId"": ""$item.messageId"",
-  ""roomId"": ""$item.roomId"",
-  ""senderUserId"": ""$item.senderUserId"",
-  ""senderUsername"": ""$item.senderUsername"",
-  ""content"": ""$item.content"",
-  ""createdAt"": ""$item.createdAt""
+  ""messageId"": ""$util.autoId()"",
+  ""roomId"": ""$ctx.args.roomId"",
+  ""senderUserId"": ""$ctx.identity.sub"",
+  ""senderUsername"": ""$ctx.identity.username"",
+  ""content"": ""$ctx.args.content"",
+  ""createdAt"": ""$util.time.nowISO8601()""
 }
 ")
 });
