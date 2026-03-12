@@ -3,6 +3,9 @@ using Amazon.CDK.AWS.AppSync;
 using Amazon.CDK.AWS.Cognito;
 using Amazon.CDK.AWS.DynamoDB;
 using Amazon.CDK.AWS.IAM;
+using Amazon.CDK.AWS.S3;
+using Amazon.CDK.AWS.S3.Deployment;
+using System.IO;
 using Constructs;
 
 namespace ChatAppInfra
@@ -315,6 +318,47 @@ chatDs.CreateResolver("GetRoomResolver", new BaseResolverProps
             });
 
 
+            var envJs = $@"
+window.__env = {{
+  region: '{this.Region}',
+  graphqlEndpoint: '{api.GraphqlUrl}',
+  userPoolId: '{userPool.UserPoolId}',
+  userPoolClientId: '{userPoolClient.UserPoolClientId}'
+}};
+";
+
+            
+            var frontendBucket = new Bucket(this, "ChatAppFrontendBucket", new BucketProps
+{
+    BucketName = $"chatapp-frontend-{EnvironmentName}",
+
+    // Enable static website hosting
+    WebsiteIndexDocument = "index.html",
+    WebsiteErrorDocument = "index.html",
+    BlockPublicAccess = BlockPublicAccess.BLOCK_ACLS_ONLY,
+    // Public access for demo environment
+    PublicReadAccess = true,
+
+    RemovalPolicy = isProd
+        ? RemovalPolicy.RETAIN
+        : RemovalPolicy.DESTROY,
+
+    AutoDeleteObjects = !isProd
+});
+
+new BucketDeployment(this, "DeployAngularApp", new BucketDeploymentProps
+{
+    DestinationBucket = frontendBucket,
+
+    Sources = new ISource[]
+    {
+        Source.Asset(Path.Combine(Directory.GetCurrentDirectory(), "frontend/dist/chatapp-frontend/browser")),
+        Source.Data("env.js", envJs)
+    }
+});
+
+
+
             new CfnOutput(this, "GraphqlEndpoint", new CfnOutputProps
             {
                 Value = api.GraphqlUrl
@@ -334,6 +378,15 @@ chatDs.CreateResolver("GetRoomResolver", new BaseResolverProps
             {
                 Value = this.Region
             });
+
+            new CfnOutput(this, "FrontendURL", new CfnOutputProps
+{
+    Value = $"http://{frontendBucket.BucketWebsiteDomainName}",
+    Description = "Frontend website URL"
+});
+
+
+
 
 
             // var messagesTable = new Table(this, "MessagesTable", new TableProps
