@@ -7,6 +7,8 @@ using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.S3.Deployment;
 using System.IO;
 using Constructs;
+using Amazon.CDK.AWS.CloudFront;
+using Amazon.CDK.AWS.CloudFront.Origins;
 
 namespace ChatAppInfra
 {
@@ -37,6 +39,72 @@ namespace ChatAppInfra
             // appSyncServiceRole.ApplyRemovalPolicy(isProd
             //         ? RemovalPolicy.RETAIN
             //         : RemovalPolicy.DESTROY);
+
+
+
+            
+            var frontendBucket = new Bucket(this, "ChatAppFrontendBucket", new BucketProps
+{
+    BucketName = $"chatapp-frontend-{EnvironmentName}",
+
+    // Enable static website hosting
+    WebsiteIndexDocument = "index.html",
+    WebsiteErrorDocument = "index.html",
+    BlockPublicAccess = BlockPublicAccess.BLOCK_ACLS_ONLY,
+    // Public access for demo environment
+    PublicReadAccess = true,
+
+    RemovalPolicy = isProd
+        ? RemovalPolicy.RETAIN
+        : RemovalPolicy.DESTROY,
+
+    AutoDeleteObjects = !isProd
+});
+
+var distribution = new Distribution(this, "FrontendDistribution", new DistributionProps
+{
+    // Default behavior for all paths
+    DefaultBehavior = new BehaviorOptions
+    {
+        // Use S3 REST API endpoint (supports HTTPS)
+        Origin = new S3StaticWebsiteOrigin(frontendBucket),
+        
+        // Redirect HTTP to HTTPS
+        ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        
+        // Optional: Cache settings
+        //CachePolicy = CachePolicy.CACHING_OPTIMIZED,
+        
+        
+    },
+    
+    // Handle SPA routing - serve index.html for 404s
+    ErrorResponses = new[]
+    {
+        new ErrorResponse
+        {
+            HttpStatus = 404,
+            ResponseHttpStatus = 200,
+            ResponsePagePath = "/index.html"
+        }
+    },
+    
+    // Default root object
+    DefaultRootObject = "index.html",
+    
+    // Optional: Enable logging
+    EnableLogging = false,
+    
+    // Optional: Add custom domain (if you have one)
+    // DomainNames = new[] { "app.yourdomain.com" },
+    // Certificate = certificate,
+    
+    // Price class (cheaper options available)
+    PriceClass = PriceClass.PRICE_CLASS_100
+});
+
+
+var cloudFrontUrl = $"https://{distribution.DistributionDomainName}";
 
 
           var userPool = new UserPool(this, "ChatUserPool", new UserPoolProps
@@ -78,18 +146,90 @@ namespace ChatAppInfra
         ? RemovalPolicy.RETAIN
         : RemovalPolicy.DESTROY
 });
+
+
+var googleProvider = new UserPoolIdentityProviderGoogle(this, "Google", new UserPoolIdentityProviderGoogleProps
+{
+    UserPool = userPool,
+
+    ClientId = "444380488435-0bothioqg10ik4q4febhnbkt1k0pskhg.apps.googleusercontent.com",
+    ClientSecretValue = SecretValue.UnsafePlainText(""),
+
+    Scopes = new[]
+    {
+        "profile",
+        "email",
+        "openid"
+    },
+
+    AttributeMapping = new AttributeMapping
+    {
+        Email = ProviderAttribute.GOOGLE_EMAIL,
+        GivenName = ProviderAttribute.GOOGLE_GIVEN_NAME,
+        FamilyName = ProviderAttribute.GOOGLE_FAMILY_NAME
+    }
+});
+
+
+
+var cognitoDomain = userPool.AddDomain("ChatDomain", new UserPoolDomainOptions
+{
+    CognitoDomain = new CognitoDomainOptions
+    {
+        DomainPrefix = $"chatapp-{EnvironmentName}"
+    }
+});
+
             var userPoolClient = userPool.AddClient("ChatAppClient", new UserPoolClientOptions
-            {
-                UserPoolClientName = $"chatapp-client-{EnvironmentName}",
+{
+    UserPoolClientName = $"chatapp-client-{EnvironmentName}",
 
-                AuthFlows = new AuthFlow
-                {
-                    UserPassword = true,
-                    UserSrp = true
-                },
+    AuthFlows = new AuthFlow
+    {
+        UserPassword = true,
+        UserSrp = true
+    },
 
-                GenerateSecret = false
-            });
+    GenerateSecret = false,
+
+    SupportedIdentityProviders = new[]
+    {
+        UserPoolClientIdentityProvider.COGNITO,
+        UserPoolClientIdentityProvider.GOOGLE
+    },
+
+    OAuth = new OAuthSettings
+    {
+        Flows = new OAuthFlows
+        {
+            AuthorizationCodeGrant = true
+        },
+
+        Scopes = new[]
+        {
+            OAuthScope.OPENID,
+            OAuthScope.EMAIL,
+            OAuthScope.PROFILE
+        },
+
+        CallbackUrls = new[]
+        {
+            "http://localhost:4200",
+            "http://localhost:4200/",
+            cloudFrontUrl,
+            $"{cloudFrontUrl}/",     
+        },
+
+        LogoutUrls = new[]
+        {
+            "http://localhost:4200",
+            cloudFrontUrl,
+            $"{cloudFrontUrl}/",     
+        }
+    }
+});
+
+userPoolClient.Node.AddDependency(googleProvider);
 
             var api = new GraphqlApi(this, "ChatApi", new GraphqlApiProps
             {
@@ -111,10 +251,17 @@ namespace ChatAppInfra
 
                 XrayEnabled = true
             });
-
-            // api.GrantMutation(appSyncServiceRole);
-            // api.GrantQuery(appSyncServiceRole);
-            // api.GrantSubscription(appSyncServiceRole);
+var envJs = $@"
+window.__env = {{
+  region: '{this.Region}',
+  graphqlEndpoint: '{api.GraphqlUrl}',
+  userPoolId: '{userPool.UserPoolId}',
+  userPoolClientId: '{userPoolClient.UserPoolClientId}',
+  cognitoDomain: '{cognitoDomain.DomainName}.auth.{this.Region}.amazoncognito.com',
+  redirectSignIn: '{cloudFrontUrl}',
+  redirectSignOut: '{cloudFrontUrl}'
+}};
+";
 
 
 
@@ -318,35 +465,7 @@ chatDs.CreateResolver("GetRoomResolver", new BaseResolverProps
             });
 
 
-            var envJs = $@"
-window.__env = {{
-  region: '{this.Region}',
-  graphqlEndpoint: '{api.GraphqlUrl}',
-  userPoolId: '{userPool.UserPoolId}',
-  userPoolClientId: '{userPoolClient.UserPoolClientId}'
-}};
-";
-
-            
-            var frontendBucket = new Bucket(this, "ChatAppFrontendBucket", new BucketProps
-{
-    BucketName = $"chatapp-frontend-{EnvironmentName}",
-
-    // Enable static website hosting
-    WebsiteIndexDocument = "index.html",
-    WebsiteErrorDocument = "index.html",
-    BlockPublicAccess = BlockPublicAccess.BLOCK_ACLS_ONLY,
-    // Public access for demo environment
-    PublicReadAccess = true,
-
-    RemovalPolicy = isProd
-        ? RemovalPolicy.RETAIN
-        : RemovalPolicy.DESTROY,
-
-    AutoDeleteObjects = !isProd
-});
-
-new BucketDeployment(this, "DeployAngularApp", new BucketDeploymentProps
+           new BucketDeployment(this, "DeployAngularApp", new BucketDeploymentProps
 {
     DestinationBucket = frontendBucket,
 
@@ -354,9 +473,11 @@ new BucketDeployment(this, "DeployAngularApp", new BucketDeploymentProps
     {
         Source.Asset(Path.Combine(Directory.GetCurrentDirectory(), "frontend/dist/chatapp-frontend/browser")),
         Source.Data("env.js", envJs)
-    }
-});
+    },
 
+    Distribution = distribution,
+    DistributionPaths = new[] { "/*" }
+});
 
 
             new CfnOutput(this, "GraphqlEndpoint", new CfnOutputProps
@@ -383,6 +504,22 @@ new BucketDeployment(this, "DeployAngularApp", new BucketDeploymentProps
 {
     Value = $"http://{frontendBucket.BucketWebsiteDomainName}",
     Description = "Frontend website URL"
+});
+
+new CfnOutput(this, "CognitoDomain", new CfnOutputProps
+            {
+                Value = cognitoDomain.BaseUrl(),
+                Description = "Cognito Hosted UI URL"
+            });
+
+            new CfnOutput(this, "LoginUrl", new CfnOutputProps
+{
+    Value = $"{cognitoDomain.BaseUrl()}/login?response_type=code&client_id={userPoolClient.UserPoolClientId}&redirect_uri=http://localhost:4200&identity_provider=Google"
+});
+
+new CfnOutput(this, "CloudFrontURL", new CfnOutputProps
+{
+    Value = cloudFrontUrl
 });
 
 
@@ -484,6 +621,7 @@ new BucketDeployment(this, "DeployAngularApp", new BucketDeploymentProps
 
 
     }
+
 }
 // ChatApp-dev.GraphqlEndpoint = https://edgpzpffrvbc5ki7bwiblumuja.appsync-api.eu-north-1.amazonaws.com/graphql
 // ChatApp-dev.Region = eu-north-1

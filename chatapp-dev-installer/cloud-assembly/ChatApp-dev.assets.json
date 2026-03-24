@@ -1,0 +1,96 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6": {
+      "displayName": "ChatApp-dev/Custom::S3AutoDeleteObjectsCustomResourceProvider Code",
+      "source": {
+        "path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "172089720817-eu-north-1-e5d74f10": {
+          "bucketName": "cdk-hnb659fds-assets-172089720817-eu-north-1",
+          "objectKey": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip",
+          "region": "eu-north-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::172089720817:role/cdk-hnb659fds-file-publishing-role-172089720817-eu-north-1"
+        }
+      }
+    },
+    "0cfdecad2260a3a84ad0c2d08a77e03c9d25e26c7b52f26b1e1faf97aef92f18": {
+      "displayName": "DeployAngularApp/AwsCliLayer/Code",
+      "source": {
+        "path": "asset.0cfdecad2260a3a84ad0c2d08a77e03c9d25e26c7b52f26b1e1faf97aef92f18.zip",
+        "packaging": "file"
+      },
+      "destinations": {
+        "172089720817-eu-north-1-1a1fb42f": {
+          "bucketName": "cdk-hnb659fds-assets-172089720817-eu-north-1",
+          "objectKey": "0cfdecad2260a3a84ad0c2d08a77e03c9d25e26c7b52f26b1e1faf97aef92f18.zip",
+          "region": "eu-north-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::172089720817:role/cdk-hnb659fds-file-publishing-role-172089720817-eu-north-1"
+        }
+      }
+    },
+    "3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9": {
+      "displayName": "Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code",
+      "source": {
+        "path": "asset.3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "172089720817-eu-north-1-3f26cd5b": {
+          "bucketName": "cdk-hnb659fds-assets-172089720817-eu-north-1",
+          "objectKey": "3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9.zip",
+          "region": "eu-north-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::172089720817:role/cdk-hnb659fds-file-publishing-role-172089720817-eu-north-1"
+        }
+      }
+    },
+    "6b93d169ce97400ed6c31a00b8f6d45dc6904eea7c16bd6e8a6e54b1c1d46bc5": {
+      "displayName": "DeployAngularApp/Asset1",
+      "source": {
+        "path": "asset.6b93d169ce97400ed6c31a00b8f6d45dc6904eea7c16bd6e8a6e54b1c1d46bc5",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "172089720817-eu-north-1-67a6f162": {
+          "bucketName": "cdk-hnb659fds-assets-172089720817-eu-north-1",
+          "objectKey": "6b93d169ce97400ed6c31a00b8f6d45dc6904eea7c16bd6e8a6e54b1c1d46bc5.zip",
+          "region": "eu-north-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::172089720817:role/cdk-hnb659fds-file-publishing-role-172089720817-eu-north-1"
+        }
+      }
+    },
+    "d895f772908478ae129c1115d5c664becbb5411dae189944eb9bbdd57f0d69b9": {
+      "displayName": "DeployAngularApp/Asset2",
+      "source": {
+        "path": "asset.d895f772908478ae129c1115d5c664becbb5411dae189944eb9bbdd57f0d69b9",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "172089720817-eu-north-1-0bfaeb5c": {
+          "bucketName": "cdk-hnb659fds-assets-172089720817-eu-north-1",
+          "objectKey": "d895f772908478ae129c1115d5c664becbb5411dae189944eb9bbdd57f0d69b9.zip",
+          "region": "eu-north-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::172089720817:role/cdk-hnb659fds-file-publishing-role-172089720817-eu-north-1"
+        }
+      }
+    },
+    "b7c74f43ec6fde84c2b9a0f36161c5bc7c8c42f7454541a369b1f8860498a642": {
+      "displayName": "ChatApp-dev Template",
+      "source": {
+        "path": "ChatApp-dev.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "172089720817-eu-north-1-4c939f2b": {
+          "bucketName": "cdk-hnb659fds-assets-172089720817-eu-north-1",
+          "objectKey": "b7c74f43ec6fde84c2b9a0f36161c5bc7c8c42f7454541a369b1f8860498a642.json",
+          "region": "eu-north-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::172089720817:role/cdk-hnb659fds-file-publishing-role-172089720817-eu-north-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
