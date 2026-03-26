@@ -9,6 +9,7 @@ using System.IO;
 using Constructs;
 using Amazon.CDK.AWS.CloudFront;
 using Amazon.CDK.AWS.CloudFront.Origins;
+using Amazon.CDK.AWS.Lambda;
 
 namespace ChatAppInfra
 {
@@ -428,23 +429,28 @@ chatDs.CreateResolver("GetRoomResolver", new BaseResolverProps
     ""senderUsername"": $util.dynamodb.toDynamoDBJson($ctx.identity.username),
     ""content"": $util.dynamodb.toDynamoDBJson($ctx.args.content),
     ""createdAt"": { ""S"": ""$timestamp"" }
+    #if($ctx.args.linkPreview)
+    ,
+    ""linkPreview"": $util.dynamodb.toDynamoDBJson($ctx.args.linkPreview)
+    #end
   }
 }
 "),
     ResponseMappingTemplate = MappingTemplate.FromString(@"
 
 {
-  ""messageId"": ""$util.autoId()"",
-  ""roomId"": ""$ctx.args.roomId"",
-  ""senderUserId"": ""$ctx.identity.sub"",
-  ""senderUsername"": ""$ctx.identity.username"",
-  ""content"": ""$ctx.args.content"",
-  ""createdAt"": ""$util.time.nowISO8601()""
+  ""messageId"": ""$ctx.result.messageId"",
+  ""roomId"": ""$ctx.result.roomId"",
+  ""senderUserId"": ""$ctx.result.senderUserId"",
+  ""senderUsername"": ""$ctx.result.senderUsername"",
+  ""content"": ""$ctx.result.content"",
+  ""createdAt"": ""$ctx.result.createdAt"",
+  ""linkPreview"": $util.toJson($ctx.result.linkPreview)
 }
 ")
 });
 
-            chatDs.CreateResolver("GetMessagesResolver", new BaseResolverProps
+ chatDs.CreateResolver("GetMessagesResolver", new BaseResolverProps
             {
                 TypeName = "Query",
                 FieldName = "getMessages",
@@ -461,7 +467,23 @@ chatDs.CreateResolver("GetRoomResolver", new BaseResolverProps
   }
 }
 "),
-                ResponseMappingTemplate = MappingTemplate.FromString("$util.toJson($ctx.result.items)")
+              ResponseMappingTemplate = MappingTemplate.FromString(@"
+#set($items = [])
+#foreach($item in $ctx.result.items)
+  #set($newItem = {
+    ""messageId"": $item.messageId,
+    ""roomId"": $item.roomId,
+    ""senderUserId"": $item.senderUserId,
+    ""senderUsername"": $item.senderUsername,
+    ""content"": $item.content,
+    ""createdAt"": $item.createdAt,
+    ""linkPreview"": $item.linkPreview
+  })
+  $util.qr($items.add($newItem))
+#end
+
+$util.toJson($items)
+")
             });
 
 
@@ -477,6 +499,26 @@ chatDs.CreateResolver("GetRoomResolver", new BaseResolverProps
 
     Distribution = distribution,
     DistributionPaths = new[] { "/*" }
+});
+
+
+
+var linkPreviewLambda = new Amazon.CDK.AWS.Lambda.Function(this, "LinkPreviewLambda", new Amazon.CDK.AWS.Lambda.FunctionProps
+{
+    Runtime = Runtime.DOTNET_8,
+    Handler = "LinkPreviewLambda::LinkPreviewLambda.Function::FunctionHandler",
+    Code = Amazon.CDK.AWS.Lambda.Code.FromAsset(Path.Combine(Directory.GetCurrentDirectory(), "lambda/LinkPreview/LinkPreviewLambda/bin/Release/net8.0/publish")),
+    Timeout = Duration.Seconds(10),
+    MemorySize = 512
+});
+
+
+var linkPreviewDs = api.AddLambdaDataSource("LinkPreviewDS", linkPreviewLambda);
+
+linkPreviewDs.CreateResolver("GetLinkPreviewResolver", new BaseResolverProps
+{
+    TypeName = "Query",
+    FieldName = "getLinkPreview"
 });
 
 

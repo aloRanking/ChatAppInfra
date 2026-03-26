@@ -4,6 +4,14 @@ type ChatRoom {
   createdAt: AWSDateTime!
 }
 
+type LinkPreview {
+  url: String!
+  title: String
+  description: String
+  image: String
+  siteName: String
+}
+
 type Message {
   messageId: ID!
   roomId: ID!
@@ -11,17 +19,34 @@ type Message {
   senderUsername: String!
   content: String!
   createdAt: AWSDateTime!
+
+  linkPreview: LinkPreview
+  messageType: String
+}
+
+input LinkPreviewInput {
+  url: String!
+  title: String
+  description: String
+  image: String
+  siteName: String
 }
 
 type Query {
   getRoom(roomId: ID!): ChatRoom
   getMessages(roomId: ID!): [Message!]!
   listRooms: [ChatRoom!]!
+
+  getLinkPreview(url: String!): LinkPreview
 }
 
 type Mutation {
   createRoom(name: String!): ChatRoom!
-  sendMessage(roomId: ID!, content: String!): Message!
+  sendMessage(
+    roomId: ID!
+    content: String!
+    linkPreview: LinkPreviewInput
+  ): Message!
 }
 
 type Subscription {
