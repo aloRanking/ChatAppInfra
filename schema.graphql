@@ -12,6 +12,11 @@ type LinkPreview {
   siteName: String
 }
 
+type UploadUrlResponse {
+  uploadUrl: String!
+  fileUrl: String!
+}
+
 type Message {
   messageId: ID!
   roomId: ID!
@@ -19,9 +24,10 @@ type Message {
   senderUsername: String!
   content: String!
   createdAt: AWSDateTime!
-
   linkPreview: LinkPreview
   messageType: String
+  mediaUrl: String
+  mediaType: String
 }
 
 input LinkPreviewInput {
@@ -43,10 +49,18 @@ type Query {
 type Mutation {
   createRoom(name: String!): ChatRoom!
   sendMessage(
-    roomId: ID!
-    content: String!
-    linkPreview: LinkPreviewInput
-  ): Message!
+  roomId: ID!
+  content: String!
+  linkPreview: LinkPreviewInput
+  messageType: String
+  mediaUrl: String
+  mediaType: String
+): Message!
+
+  getUploadUrl(
+    fileName: String!
+    contentType: String!
+  ): UploadUrlResponse!
 }
 
 type Subscription {
