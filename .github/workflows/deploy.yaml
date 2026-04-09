@@ -4,43 +4,53 @@ on:
   push:
     branches:
       - main
+      - production
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Install CDK
         run: npm install -g aws-cdk
 
       - name: Restore dependencies
         run: dotnet restore
+        working-directory: src/ChatAppInfra
 
       - name: Build the application
-        run: dotnet build --configuration Release
+        run: dotnet build --configuration Release --no-restore
+        working-directory: src/ChatAppInfra
 
       - name: Build Lambda functions
         run: |
           echo "Building Lambda: GetUploadUrlLambda"
           dotnet publish lambda/GetUploadUrlLambda/GetUploadUrlLambda.csproj \
             -c Release \
-            -o ./lambda/GetUploadUrlLambda/bin/Release/net8.0/publish
+            -o lambda/GetUploadUrlLambda/bin/Release/net8.0/publish
 
           echo "Building Lambda: ImageModerationLambda"
           dotnet publish lambda/ImageModerationLambda/ImageModerationLambda.csproj \
             -c Release \
-            -o ./lambda/ImageModerationLambda/bin/Release/net8.0/publish
+            -o lambda/ImageModerationLambda/bin/Release/net8.0/publish
 
           echo "Building Lambda: LinkPreviewLambda"
           dotnet publish lambda/LinkPreview/LinkPreviewLambda/LinkPreviewLambda.csproj \
             -c Release \
-            -o ./lambda/LinkPreview/LinkPreviewLambda/bin/Release/net8.0/publish
+            -o lambda/LinkPreview/LinkPreviewLambda/bin/Release/net8.0/publish
+        working-directory: src/ChatAppInfra
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -51,13 +61,14 @@ jobs:
 
       - name: CDK Bootstrap
         run: cdk bootstrap
+        working-directory: src/ChatAppInfra
 
       - name: Deploy Dev
         if: github.ref == 'refs/heads/main'
         run: cdk deploy -c environment=dev --require-approval never
+        working-directory: src/ChatAppInfra
 
       - name: Deploy Prod
         if: github.ref == 'refs/heads/production'
         run: cdk deploy -c environment=prod --require-approval never
-
-      
+        working-directory: src/ChatAppInfra
