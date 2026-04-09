@@ -183,8 +183,10 @@ var googleClientId = SecretValue.SecretsManager("google-oauth-secret", new Secre
             {
                 UserPool = userPool,
 
-    ClientId = "444380488435-0bothioqg10ik4q4febhnbkt1k0pskhg.apps.googleusercontent.com",
-    ClientSecretValue = SecretValue.UnsafePlainText(""),
+                ClientId = "444380488435-0bothioqg10ik4q4febhnbkt1k0pskhg.apps.googleusercontent.com",
+    
+    
+    ClientSecretValue = SecretValue.SecretsManager("google-oauth-secret"),
 
                 Scopes = new[]
                 {
