@@ -50,7 +50,7 @@ jobs:
           dotnet publish lambda/LinkPreview/LinkPreviewLambda/LinkPreviewLambda.csproj \
             -c Release \
             -o lambda/LinkPreview/LinkPreviewLambda/bin/Release/net8.0/publish
-        working-directory: src/ChatAppInfra
+        
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
