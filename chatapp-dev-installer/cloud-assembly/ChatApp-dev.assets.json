@@ -121,16 +121,16 @@
         }
       }
     },
-    "5b0c188d5872bc34b06b95dc6a65bd76d0b430f79b90209a30ea4dd6e5c28f96": {
+    "555d674688c6f3d05814176e34c2c10264b28f8947c1b9688860cecc75caa1c3": {
       "displayName": "ChatApp-dev Template",
       "source": {
         "path": "ChatApp-dev.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "172089720817-eu-north-1-a436269f": {
+        "172089720817-eu-north-1-51046b36": {
           "bucketName": "cdk-hnb659fds-assets-172089720817-eu-north-1",
-          "objectKey": "5b0c188d5872bc34b06b95dc6a65bd76d0b430f79b90209a30ea4dd6e5c28f96.json",
+          "objectKey": "555d674688c6f3d05814176e34c2c10264b28f8947c1b9688860cecc75caa1c3.json",
           "region": "eu-north-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::172089720817:role/cdk-hnb659fds-file-publishing-role-172089720817-eu-north-1"
         }
