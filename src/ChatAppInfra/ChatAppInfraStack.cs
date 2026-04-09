@@ -66,6 +66,8 @@ namespace ChatAppInfra
         //         AutoDeleteObjects = !isProd
         //     });
 
+        
+
             var newFrontendBucket = new Bucket(this, "FrontendBucketCloudFront", new BucketProps
             {
                 BucketName = $"chatapp-frontend-{EnvironmentName}-{Account}-{Region}",
