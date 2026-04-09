@@ -22,7 +22,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::172089720817:role/cdk-hnb659fds-deploy-role-172089720817-eu-north-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::172089720817:role/cdk-hnb659fds-cfn-exec-role-172089720817-eu-north-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-172089720817-eu-north-1/b7c74f43ec6fde84c2b9a0f36161c5bc7c8c42f7454541a369b1f8860498a642.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-172089720817-eu-north-1/5b0c188d5872bc34b06b95dc6a65bd76d0b430f79b90209a30ea4dd6e5c28f96.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -53,7 +53,7 @@
             ]
           }
         ],
-        "/ChatApp-dev/ChatAppFrontendBucket": [
+        "/ChatApp-dev/FrontendBucketCloudFront": [
           {
             "type": "aws:cdk:analytics:construct",
             "data": {
@@ -67,13 +67,13 @@
             }
           }
         ],
-        "/ChatApp-dev/ChatAppFrontendBucket/Resource": [
+        "/ChatApp-dev/FrontendBucketCloudFront/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ChatAppFrontendBucket98CE8359"
+            "data": "FrontendBucketCloudFront4E2836B0"
           }
         ],
-        "/ChatApp-dev/ChatAppFrontendBucket/Policy": [
+        "/ChatApp-dev/FrontendBucketCloudFront/Policy": [
           {
             "type": "aws:cdk:analytics:construct",
             "data": {
@@ -81,22 +81,22 @@
             }
           }
         ],
-        "/ChatApp-dev/ChatAppFrontendBucket/Policy/Resource": [
+        "/ChatApp-dev/FrontendBucketCloudFront/Policy/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ChatAppFrontendBucketPolicy784F197C"
+            "data": "FrontendBucketCloudFrontPolicy01C16AF6"
           }
         ],
-        "/ChatApp-dev/ChatAppFrontendBucket/AutoDeleteObjectsCustomResource": [
+        "/ChatApp-dev/FrontendBucketCloudFront/AutoDeleteObjectsCustomResource": [
           {
             "type": "aws:cdk:analytics:construct",
             "data": "*"
           }
         ],
-        "/ChatApp-dev/ChatAppFrontendBucket/AutoDeleteObjectsCustomResource/Default": [
+        "/ChatApp-dev/FrontendBucketCloudFront/AutoDeleteObjectsCustomResource/Default": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ChatAppFrontendBucketAutoDeleteObjectsCustomResource6B8F5310"
+            "data": "FrontendBucketCloudFrontAutoDeleteObjectsCustomResource511CC855"
           }
         ],
         "/ChatApp-dev/Custom::S3AutoDeleteObjectsCustomResourceProvider": [
@@ -308,6 +308,30 @@
                 "*"
               ]
             }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addSchemaDependency": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addSchemaDependency": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addSchemaDependency": [
+                "*"
+              ]
+            }
           }
         ],
         "/ChatApp-dev/ChatApi/Resource": [
@@ -449,6 +473,273 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "ChatApiGetMessagesResolver08F8BFB2"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/LinkPreviewDS/ServiceRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "assumedBy": {
+                "principalAccount": "*",
+                "assumeRoleAction": "*"
+              }
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addToPrincipalPolicy": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ChatApi/LinkPreviewDS/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiLinkPreviewDSServiceRoleF14FF7F7"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/LinkPreviewDS/ServiceRole/DefaultPolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ChatApi/LinkPreviewDS/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiLinkPreviewDSServiceRoleDefaultPolicyF7C7D04F"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/LinkPreviewDS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiLinkPreviewDS2B299256"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/GetLinkPreviewResolver/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiGetLinkPreviewResolverE1315154"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/UploadImageDataSource/ServiceRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "assumedBy": {
+                "principalAccount": "*",
+                "assumeRoleAction": "*"
+              }
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addToPrincipalPolicy": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ChatApi/UploadImageDataSource/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiUploadImageDataSourceServiceRole924587AF"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/UploadImageDataSource/ServiceRole/DefaultPolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ChatApi/UploadImageDataSource/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiUploadImageDataSourceServiceRoleDefaultPolicy752A5B89"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/UploadImageDataSource/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiUploadImageDataSourceCBFE2194"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/GetUploadUrlResolver/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiGetUploadUrlResolver4AB753C4"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/ImageModerationDataSource/ServiceRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "assumedBy": {
+                "principalAccount": "*",
+                "assumeRoleAction": "*"
+              }
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addToPrincipalPolicy": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ChatApi/ImageModerationDataSource/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiImageModerationDataSourceServiceRole62EBB272"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/ImageModerationDataSource/ServiceRole/DefaultPolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ChatApi/ImageModerationDataSource/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiImageModerationDataSourceServiceRoleDefaultPolicy3D5DDBA7"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/ImageModerationDataSource/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiImageModerationDataSource25A6D2C6"
+          }
+        ],
+        "/ChatApp-dev/ChatApi/ModerateImageResolver/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatApiModerateImageResolverC525C311"
           }
         ],
         "/ChatApp-dev/ChatTable": [
@@ -766,6 +1057,380 @@
             "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CLogGroup817B64E9"
           }
         ],
+        "/ChatApp-dev/LinkPreviewLambda": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "code": "*",
+              "handler": "*",
+              "runtime": "*",
+              "memorySize": "*",
+              "timeout": "*"
+            }
+          }
+        ],
+        "/ChatApp-dev/LinkPreviewLambda/ServiceRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "assumedBy": {
+                "principalAccount": "*",
+                "assumeRoleAction": "*"
+              },
+              "managedPolicies": [
+                {
+                  "managedPolicyArn": "*"
+                }
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/LinkPreviewLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LinkPreviewLambdaServiceRole1FD8AB57"
+          }
+        ],
+        "/ChatApp-dev/LinkPreviewLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LinkPreviewLambdaCDB5C422"
+          }
+        ],
+        "/ChatApp-dev/LinkPreviewLambda/LogGroup": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "logGroupName": "*"
+            }
+          }
+        ],
+        "/ChatApp-dev/LinkPreviewLambda/LogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LinkPreviewLambdaLogGroup1F37B9A1"
+          }
+        ],
+        "/ChatApp-dev/ChatMediaBucket": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "blockPublicAccess": "*",
+              "bucketName": "*",
+              "cors": [
+                {
+                  "allowedMethods": [
+                    "PUT",
+                    "GET"
+                  ],
+                  "allowedOrigins": "*",
+                  "allowedHeaders": "*"
+                }
+              ],
+              "encryption": "S3_MANAGED",
+              "lifecycleRules": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addCorsRule": [
+                {
+                  "allowedMethods": [
+                    "PUT",
+                    "GET"
+                  ],
+                  "allowedOrigins": "*",
+                  "allowedHeaders": "*"
+                },
+                "*",
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addLifecycleRule": [
+                {},
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ChatMediaBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ChatMediaBucket396A005F"
+          }
+        ],
+        "/ChatApp-dev/ImageUploadLambda": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "code": "*",
+              "handler": "*",
+              "runtime": "*",
+              "environment": "*",
+              "memorySize": "*",
+              "timeout": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addEnvironment": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ImageUploadLambda/ServiceRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "assumedBy": {
+                "principalAccount": "*",
+                "assumeRoleAction": "*"
+              },
+              "managedPolicies": [
+                {
+                  "managedPolicyArn": "*"
+                }
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addToPrincipalPolicy": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ImageUploadLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ImageUploadLambdaServiceRoleAA32F7EE"
+          }
+        ],
+        "/ChatApp-dev/ImageUploadLambda/ServiceRole/DefaultPolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ImageUploadLambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ImageUploadLambdaServiceRoleDefaultPolicyC36B198C"
+          }
+        ],
+        "/ChatApp-dev/ImageUploadLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ImageUploadLambdaC8E0C490"
+          }
+        ],
+        "/ChatApp-dev/ImageUploadLambda/LogGroup": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "logGroupName": "*"
+            }
+          }
+        ],
+        "/ChatApp-dev/ImageUploadLambda/LogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ImageUploadLambdaLogGroup059B3CB1"
+          }
+        ],
+        "/ChatApp-dev/ImageModerationLambda": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "code": "*",
+              "handler": "*",
+              "runtime": "*",
+              "environment": "*",
+              "memorySize": "*",
+              "timeout": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addEnvironment": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ImageModerationLambda/ServiceRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "assumedBy": {
+                "principalAccount": "*",
+                "assumeRoleAction": "*"
+              },
+              "managedPolicies": [
+                {
+                  "managedPolicyArn": "*"
+                }
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addToPrincipalPolicy": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addToPrincipalPolicy": [
+                {}
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ImageModerationLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ImageModerationLambdaServiceRoleB918A1ED"
+          }
+        ],
+        "/ChatApp-dev/ImageModerationLambda/ServiceRole/DefaultPolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          }
+        ],
+        "/ChatApp-dev/ImageModerationLambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ImageModerationLambdaServiceRoleDefaultPolicyA578A210"
+          }
+        ],
+        "/ChatApp-dev/ImageModerationLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ImageModerationLambda79CD1A81"
+          }
+        ],
+        "/ChatApp-dev/ImageModerationLambda/LogGroup": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "logGroupName": "*"
+            }
+          }
+        ],
+        "/ChatApp-dev/ImageModerationLambda/LogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ImageModerationLambdaLogGroupF0E893D5"
+          }
+        ],
         "/ChatApp-dev/GraphqlEndpoint": [
           {
             "type": "aws:cdk:logicalId",
@@ -812,6 +1477,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "CloudFrontURL"
+          }
+        ],
+        "/ChatApp-dev/MediaBucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MediaBucketName"
           }
         ],
         "/ChatApp-dev/CDKMetadata/Default": [

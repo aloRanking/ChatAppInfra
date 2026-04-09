@@ -1,9 +1,9 @@
 {
  "Resources": {
-  "ChatAppFrontendBucket98CE8359": {
+  "FrontendBucketCloudFront4E2836B0": {
    "Type": "AWS::S3::Bucket",
    "Properties": {
-    "BucketName": "chatapp-frontend-dev",
+    "BucketName": "chatapp-frontend-dev-172089720817-eu-north-1",
     "PublicAccessBlockConfiguration": {
      "BlockPublicAcls": true,
      "BlockPublicPolicy": false,
@@ -28,14 +28,14 @@
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "ChatApp-dev/ChatAppFrontendBucket/Resource"
+    "aws:cdk:path": "ChatApp-dev/FrontendBucketCloudFront/Resource"
    }
   },
-  "ChatAppFrontendBucketPolicy784F197C": {
+  "FrontendBucketCloudFrontPolicy01C16AF6": {
    "Type": "AWS::S3::BucketPolicy",
    "Properties": {
     "Bucket": {
-     "Ref": "ChatAppFrontendBucket98CE8359"
+     "Ref": "FrontendBucketCloudFront4E2836B0"
     },
     "PolicyDocument": {
      "Statement": [
@@ -51,7 +51,7 @@
          [
           {
            "Fn::GetAtt": [
-            "ChatAppFrontendBucket98CE8359",
+            "FrontendBucketCloudFront4E2836B0",
             "Arn"
            ]
           },
@@ -79,7 +79,7 @@
        "Resource": [
         {
          "Fn::GetAtt": [
-          "ChatAppFrontendBucket98CE8359",
+          "FrontendBucketCloudFront4E2836B0",
           "Arn"
          ]
         },
@@ -89,7 +89,7 @@
           [
            {
             "Fn::GetAtt": [
-             "ChatAppFrontendBucket98CE8359",
+             "FrontendBucketCloudFront4E2836B0",
              "Arn"
             ]
            },
@@ -104,10 +104,10 @@
     }
    },
    "Metadata": {
-    "aws:cdk:path": "ChatApp-dev/ChatAppFrontendBucket/Policy/Resource"
+    "aws:cdk:path": "ChatApp-dev/FrontendBucketCloudFront/Policy/Resource"
    }
   },
-  "ChatAppFrontendBucketAutoDeleteObjectsCustomResource6B8F5310": {
+  "FrontendBucketCloudFrontAutoDeleteObjectsCustomResource511CC855": {
    "Type": "Custom::S3AutoDeleteObjects",
    "Properties": {
     "ServiceToken": {
@@ -117,16 +117,16 @@
      ]
     },
     "BucketName": {
-     "Ref": "ChatAppFrontendBucket98CE8359"
+     "Ref": "FrontendBucketCloudFront4E2836B0"
     }
    },
    "DependsOn": [
-    "ChatAppFrontendBucketPolicy784F197C"
+    "FrontendBucketCloudFrontPolicy01C16AF6"
    ],
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete",
    "Metadata": {
-    "aws:cdk:path": "ChatApp-dev/ChatAppFrontendBucket/AutoDeleteObjectsCustomResource/Default"
+    "aws:cdk:path": "ChatApp-dev/FrontendBucketCloudFront/AutoDeleteObjectsCustomResource/Default"
    }
   },
   "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
@@ -177,7 +177,7 @@
       [
        "Lambda function for auto-deleting objects in ",
        {
-        "Ref": "ChatAppFrontendBucket98CE8359"
+        "Ref": "FrontendBucketCloudFront4E2836B0"
        },
        " S3 bucket."
       ]
@@ -230,7 +230,7 @@
            "/",
            {
             "Fn::GetAtt": [
-             "ChatAppFrontendBucket98CE8359",
+             "FrontendBucketCloudFront4E2836B0",
              "WebsiteURL"
             ]
            }
@@ -452,7 +452,7 @@
       "ApiId"
      ]
     },
-    "Definition": "type ChatRoom {\n  roomId: ID!\n  name: String!\n  createdAt: AWSDateTime!\n}\n\ntype Message {\n  messageId: ID!\n  roomId: ID!\n  senderUserId: ID!   \n  senderUsername: String!\n  content: String!\n  createdAt: AWSDateTime!\n}\n\ntype Query {\n  getRoom(roomId: ID!): ChatRoom\n  getMessages(roomId: ID!): [Message!]!\n  listRooms: [ChatRoom!]!\n}\n\ntype Mutation {\n  createRoom(name: String!): ChatRoom!\n  sendMessage(roomId: ID!, content: String!): Message!\n}\n\ntype Subscription {\n  onMessageSent(roomId: ID!): Message\n    @aws_subscribe(mutations: [\"sendMessage\"])\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}"
+    "Definition": "type ChatRoom {\n  roomId: ID!\n  name: String!\n  createdAt: AWSDateTime!\n}\n\ntype LinkPreview {\n  url: String!\n  title: String\n  description: String\n  image: String\n  siteName: String\n}\n\ntype UploadUrlResponse {\n  uploadUrl: String!\n  fileUrl: String!\n}\n\n\ntype Message {\n  messageId: ID!\n  roomId: ID!\n  senderUserId: ID!   \n  senderUsername: String!\n  content: String!\n  createdAt: AWSDateTime!\n  linkPreview: LinkPreview\n  messageType: String\n  mediaUrl: String\n  mediaType: String\n}\n\ntype ModerationResponse {\n  isSafe: Boolean!\n  reason: String\n}\n\n\n\ninput LinkPreviewInput {\n  url: String!\n  title: String\n  description: String\n  image: String\n  siteName: String\n}\n\ntype Query {\n  getRoom(roomId: ID!): ChatRoom\n  getMessages(roomId: ID!): [Message!]!\n  listRooms: [ChatRoom!]!\n\n  getLinkPreview(url: String!): LinkPreview\n}\n\ntype Mutation {\n  createRoom(name: String!): ChatRoom!\n  sendMessage(\n  roomId: ID!\n  content: String!\n  linkPreview: LinkPreviewInput\n  messageType: String\n  mediaUrl: String\n  mediaType: String\n): Message!\n\n  getUploadUrl(\n    fileName: String!\n    contentType: String!\n  ): UploadUrlResponse!\n\n  moderateImage(\n  key: String!\n): ModerationResponse!\n}\n\ntype Subscription {\n  onMessageSent(roomId: ID!): Message\n    @aws_subscribe(mutations: [\"sendMessage\"])\n}\n\nschema {\n  query: Query\n  mutation: Mutation\n  subscription: Subscription\n}"
    },
    "Metadata": {
     "aws:cdk:path": "ChatApp-dev/ChatApi/Schema"
@@ -649,8 +649,8 @@
     "DataSourceName": "ChatDataSourcedev",
     "FieldName": "sendMessage",
     "Kind": "UNIT",
-    "RequestMappingTemplate": "\n#set($messageId = $util.autoId())\n#set($timestamp = $util.time.nowISO8601())\n{\n  \"version\": \"2018-05-29\",\n  \"operation\": \"PutItem\",\n  \"key\": {\n    \"PK\": $util.dynamodb.toDynamoDBJson(\"ROOM#$ctx.args.roomId\"),\n    \"SK\": $util.dynamodb.toDynamoDBJson(\"MSG#$timestamp#$messageId\")\n  },\n  \"attributeValues\": {\n    \"EntityType\": { \"S\": \"Message\" },\n    \"messageId\": { \"S\": \"$messageId\" },\n    \"roomId\": $util.dynamodb.toDynamoDBJson($ctx.args.roomId),\n    \"senderUserId\": $util.dynamodb.toDynamoDBJson($ctx.identity.sub),\n    \"senderUsername\": $util.dynamodb.toDynamoDBJson($ctx.identity.username),\n    \"content\": $util.dynamodb.toDynamoDBJson($ctx.args.content),\n    \"createdAt\": { \"S\": \"$timestamp\" }\n  }\n}\n",
-    "ResponseMappingTemplate": "\n\n{\n  \"messageId\": \"$util.autoId()\",\n  \"roomId\": \"$ctx.args.roomId\",\n  \"senderUserId\": \"$ctx.identity.sub\",\n  \"senderUsername\": \"$ctx.identity.username\",\n  \"content\": \"$ctx.args.content\",\n  \"createdAt\": \"$util.time.nowISO8601()\"\n}\n",
+    "RequestMappingTemplate": "\n#set($messageId = $util.autoId())\n#set($timestamp = $util.time.nowISO8601())\n{\n  \"version\": \"2018-05-29\",\n  \"operation\": \"PutItem\",\n  \"key\": {\n    \"PK\": $util.dynamodb.toDynamoDBJson(\"ROOM#$ctx.args.roomId\"),\n    \"SK\": $util.dynamodb.toDynamoDBJson(\"MSG#$timestamp#$messageId\")\n  },\n  \"attributeValues\": {\n    \"EntityType\": { \"S\": \"Message\" },\n    \"messageId\": { \"S\": \"$messageId\" },\n    \"roomId\": $util.dynamodb.toDynamoDBJson($ctx.args.roomId),\n    \"senderUserId\": $util.dynamodb.toDynamoDBJson($ctx.identity.sub),\n    \"senderUsername\": $util.dynamodb.toDynamoDBJson($ctx.identity.username),\n    \"content\": $util.dynamodb.toDynamoDBJson($ctx.args.content),\n    \"createdAt\": { \"S\": \"$timestamp\" }\n    #if($ctx.args.linkPreview)\n    ,\n    \"linkPreview\": $util.dynamodb.toDynamoDBJson($ctx.args.linkPreview)\n    #end\n    #if($ctx.args.mediaUrl)\n    ,\n    \"mediaUrl\": $util.dynamodb.toDynamoDBJson($ctx.args.mediaUrl)\n    #end\n    #if($ctx.args.mediaType)\n    ,\n    \"mediaType\": $util.dynamodb.toDynamoDBJson($ctx.args.mediaType)\n    #end\n    #if($ctx.args.messageType)\n    ,\n    \"messageType\": $util.dynamodb.toDynamoDBJson($ctx.args.messageType)\n    #end\n  }\n}\n",
+    "ResponseMappingTemplate": "\n{\n  \"messageId\": \"$ctx.result.messageId\",\n  \"roomId\": \"$ctx.result.roomId\",\n  \"senderUserId\": \"$ctx.result.senderUserId\",\n  \"senderUsername\": \"$ctx.result.senderUsername\",\n  \"content\": \"$ctx.result.content\",\n  \"createdAt\": \"$ctx.result.createdAt\",\n  \"linkPreview\": $util.toJson($ctx.result.linkPreview),\n  \"mediaUrl\": \"$ctx.result.mediaUrl\",\n  \"mediaType\": \"$ctx.result.mediaType\",\n  \"messageType\": \"$ctx.result.messageType\"\n}\n",
     "TypeName": "Mutation"
    },
    "DependsOn": [
@@ -674,7 +674,7 @@
     "FieldName": "getMessages",
     "Kind": "UNIT",
     "RequestMappingTemplate": "\n{\n  \"version\": \"2018-05-29\",\n  \"operation\": \"Query\",\n  \"query\": {\n    \"expression\": \"PK = :pk AND begins_with(SK, :sk)\",\n    \"expressionValues\": {\n      \":pk\": $util.dynamodb.toDynamoDBJson(\"ROOM#$ctx.args.roomId\"),\n      \":sk\": $util.dynamodb.toDynamoDBJson(\"MSG#\")\n    }\n  }\n}\n",
-    "ResponseMappingTemplate": "$util.toJson($ctx.result.items)",
+    "ResponseMappingTemplate": "\n#set($items = [])\n#foreach($item in $ctx.result.items)\n  #set($newItem = {\n    \"messageId\": \"$item.messageId\",\n    \"roomId\": \"$item.roomId\",\n    \"senderUserId\": \"$item.senderUserId\",\n    \"senderUsername\": \"$item.senderUsername\",\n    \"content\": \"$item.content\",\n    \"createdAt\": \"$item.createdAt\",\n    \"linkPreview\": $item.linkPreview,\n    \"mediaUrl\": \"$item.mediaUrl\",\n    \"mediaType\": \"$item.mediaType\",\n    \"messageType\": \"$item.messageType\"\n  })\n  $util.qr($items.add($newItem))\n#end\n\n$util.toJson($items)\n",
     "TypeName": "Query"
    },
    "DependsOn": [
@@ -683,6 +683,357 @@
    ],
    "Metadata": {
     "aws:cdk:path": "ChatApp-dev/ChatApi/GetMessagesResolver/Resource"
+   }
+  },
+  "ChatApiLinkPreviewDSServiceRoleF14FF7F7": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "appsync.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/LinkPreviewDS/ServiceRole/Resource"
+   }
+  },
+  "ChatApiLinkPreviewDSServiceRoleDefaultPolicyF7C7D04F": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "LinkPreviewLambdaCDB5C422",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "LinkPreviewLambdaCDB5C422",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ChatApiLinkPreviewDSServiceRoleDefaultPolicyF7C7D04F",
+    "Roles": [
+     {
+      "Ref": "ChatApiLinkPreviewDSServiceRoleF14FF7F7"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/LinkPreviewDS/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ChatApiLinkPreviewDS2B299256": {
+   "Type": "AWS::AppSync::DataSource",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "LambdaConfig": {
+     "LambdaFunctionArn": {
+      "Fn::GetAtt": [
+       "LinkPreviewLambdaCDB5C422",
+       "Arn"
+      ]
+     }
+    },
+    "Name": "LinkPreviewDS",
+    "ServiceRoleArn": {
+     "Fn::GetAtt": [
+      "ChatApiLinkPreviewDSServiceRoleF14FF7F7",
+      "Arn"
+     ]
+    },
+    "Type": "AWS_LAMBDA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/LinkPreviewDS/Resource"
+   }
+  },
+  "ChatApiGetLinkPreviewResolverE1315154": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "DataSourceName": "LinkPreviewDS",
+    "FieldName": "getLinkPreview",
+    "Kind": "UNIT",
+    "TypeName": "Query"
+   },
+   "DependsOn": [
+    "ChatApiLinkPreviewDS2B299256",
+    "ChatApiSchema1E72BAA5"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/GetLinkPreviewResolver/Resource"
+   }
+  },
+  "ChatApiUploadImageDataSourceServiceRole924587AF": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "appsync.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/UploadImageDataSource/ServiceRole/Resource"
+   }
+  },
+  "ChatApiUploadImageDataSourceServiceRoleDefaultPolicy752A5B89": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ImageUploadLambdaC8E0C490",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ImageUploadLambdaC8E0C490",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ChatApiUploadImageDataSourceServiceRoleDefaultPolicy752A5B89",
+    "Roles": [
+     {
+      "Ref": "ChatApiUploadImageDataSourceServiceRole924587AF"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/UploadImageDataSource/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ChatApiUploadImageDataSourceCBFE2194": {
+   "Type": "AWS::AppSync::DataSource",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "LambdaConfig": {
+     "LambdaFunctionArn": {
+      "Fn::GetAtt": [
+       "ImageUploadLambdaC8E0C490",
+       "Arn"
+      ]
+     }
+    },
+    "Name": "UploadImageDataSource",
+    "ServiceRoleArn": {
+     "Fn::GetAtt": [
+      "ChatApiUploadImageDataSourceServiceRole924587AF",
+      "Arn"
+     ]
+    },
+    "Type": "AWS_LAMBDA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/UploadImageDataSource/Resource"
+   }
+  },
+  "ChatApiGetUploadUrlResolver4AB753C4": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "DataSourceName": "UploadImageDataSource",
+    "FieldName": "getUploadUrl",
+    "Kind": "UNIT",
+    "TypeName": "Mutation"
+   },
+   "DependsOn": [
+    "ChatApiSchema1E72BAA5",
+    "ChatApiUploadImageDataSourceCBFE2194"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/GetUploadUrlResolver/Resource"
+   }
+  },
+  "ChatApiImageModerationDataSourceServiceRole62EBB272": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "appsync.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/ImageModerationDataSource/ServiceRole/Resource"
+   }
+  },
+  "ChatApiImageModerationDataSourceServiceRoleDefaultPolicy3D5DDBA7": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "lambda:InvokeFunction",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ImageModerationLambda79CD1A81",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ImageModerationLambda79CD1A81",
+             "Arn"
+            ]
+           },
+           ":*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ChatApiImageModerationDataSourceServiceRoleDefaultPolicy3D5DDBA7",
+    "Roles": [
+     {
+      "Ref": "ChatApiImageModerationDataSourceServiceRole62EBB272"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/ImageModerationDataSource/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ChatApiImageModerationDataSource25A6D2C6": {
+   "Type": "AWS::AppSync::DataSource",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "LambdaConfig": {
+     "LambdaFunctionArn": {
+      "Fn::GetAtt": [
+       "ImageModerationLambda79CD1A81",
+       "Arn"
+      ]
+     }
+    },
+    "Name": "ImageModerationDataSource",
+    "ServiceRoleArn": {
+     "Fn::GetAtt": [
+      "ChatApiImageModerationDataSourceServiceRole62EBB272",
+      "Arn"
+     ]
+    },
+    "Type": "AWS_LAMBDA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/ImageModerationDataSource/Resource"
+   }
+  },
+  "ChatApiModerateImageResolverC525C311": {
+   "Type": "AWS::AppSync::Resolver",
+   "Properties": {
+    "ApiId": {
+     "Fn::GetAtt": [
+      "ChatApiD29796E1",
+      "ApiId"
+     ]
+    },
+    "DataSourceName": "ImageModerationDataSource",
+    "FieldName": "moderateImage",
+    "Kind": "UNIT",
+    "TypeName": "Mutation"
+   },
+   "DependsOn": [
+    "ChatApiImageModerationDataSource25A6D2C6",
+    "ChatApiSchema1E72BAA5"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatApi/ModerateImageResolver/Resource"
    }
   },
   "ChatTable7A2D1C24": {
@@ -776,7 +1127,7 @@
      "cdk-hnb659fds-assets-172089720817-eu-north-1"
     ],
     "SourceObjectKeys": [
-     "6b93d169ce97400ed6c31a00b8f6d45dc6904eea7c16bd6e8a6e54b1c1d46bc5.zip",
+     "f65b38f190abc04f563224596d410866ad85743d84752aacc60aa0bd60c127a5.zip",
      "d895f772908478ae129c1115d5c664becbb5411dae189944eb9bbdd57f0d69b9.zip"
     ],
     "SourceMarkers": [
@@ -816,7 +1167,7 @@
      {}
     ],
     "DestinationBucketName": {
-     "Ref": "ChatAppFrontendBucket98CE8359"
+     "Ref": "FrontendBucketCloudFront4E2836B0"
     },
     "WaitForDistributionInvalidation": true,
     "Prune": true,
@@ -902,7 +1253,7 @@
        "Resource": [
         {
          "Fn::GetAtt": [
-          "ChatAppFrontendBucket98CE8359",
+          "FrontendBucketCloudFront4E2836B0",
           "Arn"
          ]
         },
@@ -912,7 +1263,7 @@
           [
            {
             "Fn::GetAtt": [
-             "ChatAppFrontendBucket98CE8359",
+             "FrontendBucketCloudFront4E2836B0",
              "Arn"
             ]
            },
@@ -1004,10 +1355,442 @@
     "aws:cdk:path": "ChatApp-dev/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/LogGroup/Resource"
    }
   },
+  "LinkPreviewLambdaServiceRole1FD8AB57": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/LinkPreviewLambda/ServiceRole/Resource"
+   }
+  },
+  "LinkPreviewLambdaCDB5C422": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-172089720817-eu-north-1",
+     "S3Key": "a3389f1886f4fa5c7c8c230640a96fb6ab9cf12cbd711836c3ffd614a6858fc8.zip"
+    },
+    "Handler": "LinkPreviewLambda::LinkPreviewLambda.Function::FunctionHandler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "LinkPreviewLambdaServiceRole1FD8AB57",
+      "Arn"
+     ]
+    },
+    "Runtime": "dotnet8",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "LinkPreviewLambdaServiceRole1FD8AB57"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/LinkPreviewLambda/Resource",
+    "aws:asset:path": "asset.a3389f1886f4fa5c7c8c230640a96fb6ab9cf12cbd711836c3ffd614a6858fc8",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "LinkPreviewLambdaLogGroup1F37B9A1": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "LinkPreviewLambdaCDB5C422"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 731
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/LinkPreviewLambda/LogGroup/Resource"
+   }
+  },
+  "ChatMediaBucket396A005F": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": "chatapp-mediaa-dev-172089720817-eu-north-1",
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "PUT",
+        "GET"
+       ],
+       "AllowedOrigins": [
+        "*"
+       ]
+      }
+     ]
+    },
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "ExpirationInDays": 30,
+       "Status": "Enabled"
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ChatMediaBucket/Resource"
+   }
+  },
+  "ImageUploadLambdaServiceRoleAA32F7EE": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ImageUploadLambda/ServiceRole/Resource"
+   }
+  },
+  "ImageUploadLambdaServiceRoleDefaultPolicyC36B198C": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ChatMediaBucket396A005F",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ChatMediaBucket396A005F",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ImageUploadLambdaServiceRoleDefaultPolicyC36B198C",
+    "Roles": [
+     {
+      "Ref": "ImageUploadLambdaServiceRoleAA32F7EE"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ImageUploadLambda/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ImageUploadLambdaC8E0C490": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-172089720817-eu-north-1",
+     "S3Key": "5f696d36d26a5816cd5c42631fbbe821a4911923181c6c477871d74e6f868751.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": {
+       "Ref": "ChatMediaBucket396A005F"
+      }
+     }
+    },
+    "Handler": "GetUploadUrlLambda::GetUploadUrlLambda.Function::FunctionHandler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "ImageUploadLambdaServiceRoleAA32F7EE",
+      "Arn"
+     ]
+    },
+    "Runtime": "dotnet8",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "ImageUploadLambdaServiceRoleDefaultPolicyC36B198C",
+    "ImageUploadLambdaServiceRoleAA32F7EE"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ImageUploadLambda/Resource",
+    "aws:asset:path": "asset.5f696d36d26a5816cd5c42631fbbe821a4911923181c6c477871d74e6f868751",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "ImageUploadLambdaLogGroup059B3CB1": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "ImageUploadLambdaC8E0C490"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 731
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ImageUploadLambda/LogGroup/Resource"
+   }
+  },
+  "ImageModerationLambdaServiceRoleB918A1ED": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ImageModerationLambda/ServiceRole/Resource"
+   }
+  },
+  "ImageModerationLambdaServiceRoleDefaultPolicyA578A210": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ChatMediaBucket396A005F",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ChatMediaBucket396A005F",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "rekognition:DetectModerationLabels",
+        "s3:GetObject",
+        "s3:GetObjectMetadata"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ImageModerationLambdaServiceRoleDefaultPolicyA578A210",
+    "Roles": [
+     {
+      "Ref": "ImageModerationLambdaServiceRoleB918A1ED"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ImageModerationLambda/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ImageModerationLambda79CD1A81": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-172089720817-eu-north-1",
+     "S3Key": "c58d5ab69fa1247709a0a1de7b222ae44c0454dcb7cd9fd9d4f802e71770731f.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "BUCKET_NAME": {
+       "Ref": "ChatMediaBucket396A005F"
+      }
+     }
+    },
+    "Handler": "ImageModerationLambda::ImageModerationLambda.Function::FunctionHandler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "ImageModerationLambdaServiceRoleB918A1ED",
+      "Arn"
+     ]
+    },
+    "Runtime": "dotnet8",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "ImageModerationLambdaServiceRoleDefaultPolicyA578A210",
+    "ImageModerationLambdaServiceRoleB918A1ED"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ImageModerationLambda/Resource",
+    "aws:asset:path": "asset.c58d5ab69fa1247709a0a1de7b222ae44c0454dcb7cd9fd9d4f802e71770731f",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "ImageModerationLambdaLogGroupF0E893D5": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "ImageModerationLambda79CD1A81"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 731
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "ChatApp-dev/ImageModerationLambda/LogGroup/Resource"
+   }
+  },
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/9VXX2/bNhD/LOVjwahpCwyFgT04dpoF81rXSgYMQRFQ1FlmQ/FY/rGrCvruAylKkZMu2woUw+AHkXfH493vjnfnV9mr12+y02fsYE94eXciRZG1uWP8jrKDvW3t66w98/wO3E1LmHe4BAkO3hefgDtLZs54oKSQyO/WvpCCzzkHa8mMPCeUFPHkO1ZDIugoswFWDnK9AgM17plcoxS8ITNSgnUGG0LJAQorHJwbg2aJ3NegXFKWWJeqhC9HrO4jXWxVbzbtP73mmzaZ9Eis5yfhM2aho1yiL7cGlcvapbDOiMI7geqmJSVsmZfuDHZsL9CQWUvQiEqoZNlewAHM2qBDjvdeGSiFAe5OHJ7snNOWdHTQtUF0PapJByhWSFhhVQlVkdmWSQuUQMBhA1ajsmDJ7KYlQVPumPMD6iaxf/krxppVsGZuN6BAtBEcFpLFwK3Hze3L09OE0hSAjnKslHCYtdcWzBpRhuTgHL1yG+C4B9OQ2SsaE+Z3MGLbBIigZkL2Ee8o0czaA5pyQKcltVArUFWyK5j72QsDS1EJN8mUSFzhAQxnFh7Q86YuUNoRr0S+1noq3j2VcRbkNheVutbnMQTlcIUVlbpUcylYhL4l3oJRMbmTUp/gmGR8IEUIBGcBvBGIMyybIdRhn/v76Hc96AO6dFgssWYiJOBwUVKQ4tGzww1lXK0NbMWXpJG2pGAWro0ksxvynHz8BuXo1l7bePdCClDu8d3Mu91biYcRkXUK7ABboOVGjyBVoMAwBzlwE15iihTOfYh8SziTsmD87trIIXG3g/5wGRrxNUK5wBIuDAuPPqmWWKF3k4OWo4Z+01FivdZoHJSXJSgnXLM2uBclGDsJ1r2vYxSPcemZIy4PdV0gVhIintNTD8U6yrS2jeJZe2GY3n2Wcy1uWqLuU+eBs2orqhjbvmDMp9xH2Fw1Gh46NWo4imDX9UVIKNFrioe+GNYcpX/IFlaWOd9BzZagQZWgwssZc+k/4UaMI4AfVnMtJrv+BF02itW4LJbMsRy94RDL2f1uAxblHkwgD+uOClZn7QYlhMpmra+hPItFShuhuNBMzvt6N8QqyoQDcz7C2CXjr3A9nBrqzU3b9a45x/juUkmhYOSNfj/JfFrvd9tMSc0Uq6AvzCI1mSmtmZsk+08M+VEOfi83ZkxwmqaZIGAxmHKFgfPIwsfksgydFcLIYY+ufUz+0fr/FTl63zve0TK+jbLI2qvw0m9a4sJ30r0KIaVQ1W9YBsp6/sft+nxzuzn/cH2eX4V5DoVyl+pK1DA0/lwDP+p235AZK0us/U92Y82Mi4XpV4i5PKmPrq9xeSztaNxTEgmPC4kFkzlwVCUzTRwdY36LsJoOqgZDN76vpPPVigz4RbQ6al/ftiVoiU1AOOtnx+VIoMxacDabh09HJauLkmXtYqtWrIlDgRWoaC5UJcGheusVT/Ol96JMhsgga1NqhKlwLwyqyRTc6117o9GOfosa0A8SJuZWXNZQo2ly8XUggN5BDYbJ3KFhFUxYe83vV7kvFLixrQL3RrjmwqDXY5MWEmxjHdSDZVhFgXFIKQfVO6ZKCWawz6tgcCo/MU6/gWMlc6z3m4YG9PHbrNQFJuD9LWL/e3TOpy7do9AzV1P3+3wdwOmoxMpm7SpdHcBKywezziDRdXThrcM6dMbQLsfbhnbZd9QjmWHECX+jaMz+3LHwL4aOB/qkvY2humUHy6XI5ge7kCKaH0pVuOC9d9q7ji7RvQP34k12mr386UX27vxqgQbmWp+kV/Tz/qfs9MXL7DT8nn2yQpwk3LJN//0TAZfrDOkOAAA="
+    "Analytics": "v2:deflate64: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"
    },
    "Metadata": {
     "aws:cdk:path": "ChatApp-dev/CDKMetadata/Default"
@@ -1051,7 +1834,7 @@
           "/",
           {
            "Fn::GetAtt": [
-            "ChatAppFrontendBucket98CE8359",
+            "FrontendBucketCloudFront4E2836B0",
             "WebsiteURL"
            ]
           }
@@ -1110,6 +1893,12 @@
       }
      ]
     ]
+   }
+  },
+  "MediaBucketName": {
+   "Description": "S3 bucket for media uploads",
+   "Value": {
+    "Ref": "ChatMediaBucket396A005F"
    }
   }
  },

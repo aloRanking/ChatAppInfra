@@ -1,0 +1,63 @@
+name: Deploy ChatAppInfrastructure App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubnuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install CDK
+        run: npm install -g aws-cdk
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build the application
+        run: dotnet build --configuration Release
+
+      - name: Build Lambda functions
+        run: |
+          echo "Building Lambda: GetUploadUrlLambda"
+          dotnet publish lambda/GetUploadUrlLambda/GetUploadUrlLambda.csproj \
+            -c Release \
+            -o ./lambda/GetUploadUrlLambda/bin/Release/net8.0/publish
+
+          echo "Building Lambda: ImageModerationLambda"
+          dotnet publish lambda/ImageModerationLambda/ImageModerationLambda.csproj \
+            -c Release \
+            -o ./lambda/ImageModerationLambda/bin/Release/net8.0/publish
+
+          echo "Building Lambda: LinkPreviewLambda"
+          dotnet publish lambda/LinkPreview/LinkPreviewLambda/LinkPreviewLambda.csproj \
+            -c Release \
+            -o ./lambda/LinkPreview/LinkPreviewLambda/bin/Release/net8.0/publish
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: CDK Bootstrap
+        run: cdk bootstrap
+
+      - name: Deploy Dev
+        if: github.ref == 'refs/heads/main'
+        run: cdk deploy -c environment=dev --require-approval never
+
+      - name: Deploy Prod
+        if: github.ref == 'refs/heads/production'
+        run: cdk deploy -c environment=prod --require-approval never
+
+      

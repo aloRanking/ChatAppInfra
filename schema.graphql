@@ -17,6 +17,7 @@ type UploadUrlResponse {
   fileUrl: String!
 }
 
+
 type Message {
   messageId: ID!
   roomId: ID!
@@ -29,6 +30,13 @@ type Message {
   mediaUrl: String
   mediaType: String
 }
+
+type ModerationResponse {
+  isSafe: Boolean!
+  reason: String
+}
+
+
 
 input LinkPreviewInput {
   url: String!
@@ -61,6 +69,10 @@ type Mutation {
     fileName: String!
     contentType: String!
   ): UploadUrlResponse!
+
+  moderateImage(
+  key: String!
+): ModerationResponse!
 }
 
 type Subscription {

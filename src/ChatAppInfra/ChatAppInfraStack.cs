@@ -13,6 +13,7 @@ using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.SES.Actions;
 using Amazon.CDK.AWS.Events.Targets;
 using System.Collections.Generic;
+using Amazon.CDK.AWS.SecretsManager;
 
 namespace ChatAppInfra
 {
@@ -47,9 +48,27 @@ namespace ChatAppInfra
 
 
 
-            var frontendBucket = new Bucket(this, "ChatAppFrontendBucket", new BucketProps
+        //     var frontendBucket = new Bucket(this, "ChatAppFrontendBucket", new BucketProps
+        //     {
+        //         BucketName = $"chatapp-frontend-{EnvironmentName}",
+
+        //         // Enable static website hosting
+        //         WebsiteIndexDocument = "index.html",
+        //         WebsiteErrorDocument = "index.html",
+        //         BlockPublicAccess = BlockPublicAccess.BLOCK_ACLS_ONLY,
+        //         // Public access for demo environment
+        //         PublicReadAccess = true,
+
+        //         RemovalPolicy = isProd
+        // ? RemovalPolicy.RETAIN
+        // : RemovalPolicy.DESTROY,
+
+        //         AutoDeleteObjects = !isProd
+        //     });
+
+            var newFrontendBucket = new Bucket(this, "FrontendBucketCloudFront", new BucketProps
             {
-                BucketName = $"chatapp-frontend-{EnvironmentName}",
+                BucketName = $"chatapp-frontend-{EnvironmentName}-{Account}-{Region}",
 
                 // Enable static website hosting
                 WebsiteIndexDocument = "index.html",
@@ -71,7 +90,7 @@ namespace ChatAppInfra
                 DefaultBehavior = new BehaviorOptions
                 {
                     // Use S3 REST API endpoint (supports HTTPS)
-                    Origin = new S3StaticWebsiteOrigin(frontendBucket),
+                    Origin = new S3StaticWebsiteOrigin(newFrontendBucket),
 
                     // Redirect HTTP to HTTPS
                     ViewerProtocolPolicy = ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -109,7 +128,15 @@ namespace ChatAppInfra
 
 
             var cloudFrontUrl = $"https://{distribution.DistributionDomainName}";
+            var googleClientSecret = SecretValue.SecretsManager("google-oauth-secret", new SecretsManagerSecretOptions
+{
+    JsonField = "clientSecret"  // Extract only the secret part
+});
 
+var googleClientId = SecretValue.SecretsManager("google-oauth-secret", new SecretsManagerSecretOptions
+{
+    JsonField = "clientId"
+});
 
             var userPool = new UserPool(this, "ChatUserPool", new UserPoolProps
             {
@@ -510,7 +537,7 @@ $util.toJson($items)
 
             new BucketDeployment(this, "DeployAngularApp", new BucketDeploymentProps
             {
-                DestinationBucket = frontendBucket,
+                DestinationBucket = newFrontendBucket,
 
                 Sources = new ISource[]
      {
@@ -599,6 +626,42 @@ $util.toJson($items)
                 FieldName = "getUploadUrl"
             });
 
+            //image moderation lambda
+            var imageModerationLambda = new Amazon.CDK.AWS.Lambda.Function(this, "ImageModerationLambda", new Amazon.CDK.AWS.Lambda.FunctionProps
+            {
+                Runtime = Runtime.DOTNET_8,
+                Handler = "ImageModerationLambda::ImageModerationLambda.Function::FunctionHandler",
+                Code = Amazon.CDK.AWS.Lambda.Code.FromAsset( Path.Combine(Directory.GetCurrentDirectory(), "lambda/ImageModerationLambda/bin/Release/net8.0/publish")),
+                Timeout = Duration.Seconds(10),
+                MemorySize = 512,
+                Environment = new Dictionary<string, string>
+    {
+        { "BUCKET_NAME", mediaBucket.BucketName },
+        
+
+    }
+            });
+
+            mediaBucket.GrantRead(imageModerationLambda);
+            imageModerationLambda.AddToRolePolicy(new PolicyStatement(new PolicyStatementProps
+{
+    Actions = new[]
+    {
+        "rekognition:DetectModerationLabels",
+        "s3:GetObject",
+        "s3:GetObjectMetadata"
+    },
+    Resources = new[] { "*" }
+}));
+
+            var imageModerationLambdaDS = api.AddLambdaDataSource("ImageModerationDataSource", imageModerationLambda);
+
+            imageModerationLambdaDS.CreateResolver("ModerateImageResolver", new BaseResolverProps
+            {
+                TypeName = "Mutation",
+                FieldName = "moderateImage"
+            });
+
 
             new CfnOutput(this, "GraphqlEndpoint", new CfnOutputProps
             {
@@ -622,7 +685,7 @@ $util.toJson($items)
 
             new CfnOutput(this, "FrontendURL", new CfnOutputProps
             {
-                Value = $"http://{frontendBucket.BucketWebsiteDomainName}",
+                Value = $"http://{newFrontendBucket.BucketWebsiteDomainName}",
                 Description = "Frontend website URL"
             });
 
