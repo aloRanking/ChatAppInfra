@@ -7,8 +7,11 @@ on:
       - production
 
 jobs:
-  build:
+
+  deploy-dev:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,7 +53,6 @@ jobs:
           dotnet publish lambda/LinkPreview/LinkPreviewLambda/LinkPreviewLambda.csproj \
             -c Release \
             -o lambda/LinkPreview/LinkPreviewLambda/bin/Release/net8.0/publish
-        
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -61,14 +63,53 @@ jobs:
 
       - name: CDK Bootstrap
         run: cdk bootstrap
-        
+
+      - name: CDK Diff Dev
+        run: cdk diff -c environment=dev
 
       - name: Deploy Dev
-        if: github.ref == 'refs/heads/main'
         run: cdk deploy -c environment=dev --require-approval never
-       
+
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/production'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install CDK
+        run: npm install -g aws-cdk
+
+      - name: Restore dependencies
+        run: dotnet restore
+        working-directory: src/ChatAppInfra
+
+      - name: Build the application
+        run: dotnet build --configuration Release --no-restore
+        working-directory: src/ChatAppInfra
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: CDK Diff Prod
+        run: cdk diff -c environment=prod
 
       - name: Deploy Prod
-        if: github.ref == 'refs/heads/production'
         run: cdk deploy -c environment=prod --require-approval never
-        
