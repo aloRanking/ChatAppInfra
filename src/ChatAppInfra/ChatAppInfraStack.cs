@@ -15,6 +15,7 @@ using Amazon.CDK.AWS.Events.Targets;
 using System.Collections.Generic;
 using Amazon.CDK.AWS.SecretsManager;
 
+
 namespace ChatAppInfra
 {
     public class ChatAppInfraStack : Stack
@@ -32,19 +33,17 @@ namespace ChatAppInfra
             }
             var isProd = EnvironmentName == "prod";
 
-            // var appSyncServiceRole = new Role(this, "AppSyncServiceRole", new RoleProps
-            // {
-            //     RoleName = $"chatapp-appsync-role-{EnvironmentName}",
-            //     AssumedBy = new ServicePrincipal("appsync.amazonaws.com"),
-            //     Description = "Allows AppSync resolvers to access backend resources",
-
-
-            // });
-
-            // appSyncServiceRole.ApplyRemovalPolicy(isProd
-            //         ? RemovalPolicy.RETAIN
-            //         : RemovalPolicy.DESTROY);
-
+            var version = this.Node.TryGetContext("version")?.ToString() ?? "1.0.0";
+            var commit = this.Node.TryGetContext("commit")?.ToString() ?? "local";
+            var deployedAt = System.DateTime.UtcNow.ToString("yyyy-MM-dd-HHmmss");
+            
+            // Stack-level tags
+            Amazon.CDK.Tags.Of(this).Add("Environment", environmentName);
+            Amazon.CDK.Tags.Of(this).Add("Version", version);
+            Amazon.CDK.Tags.Of(this).Add("Commit", commit);
+            Amazon.CDK.Tags.Of(this).Add("DeployedAt", deployedAt);
+            Amazon.CDK.Tags.Of(this).Add("Project", "ChatApp");
+            Amazon.CDK.Tags.Of(this).Add("Stack", id);
 
 
 

@@ -67,8 +67,20 @@ jobs:
       - name: CDK Diff Dev
         run: cdk diff -c environment=dev
 
+      - name: Generate Version
+        id: version
+        run: echo "VERSION=$(date +'%Y.%m.%d.%H%M')" >> $GITHUB_ENV
+
       - name: Deploy Dev
-        run: cdk deploy -c environment=dev --require-approval never
+        run: cdk deploy -c environment=dev -c version=${{ env.VERSION }} --require-approval never
+
+      - name: Create Git Tag
+        run: |
+          git fetch --tags
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag v${{ env.VERSION }}
+          git push origin v${{ env.VERSION }}
 
 
   deploy-prod:
@@ -110,6 +122,19 @@ jobs:
 
       - name: CDK Diff Prod
         run: cdk diff -c environment=prod
+      - name: Generate Version
+        id: version
+        run: echo "VERSION=$(date +'%Y.%m.%d.%H%M')" >> $GITHUB_ENV
+
+ 
+
 
       - name: Deploy Prod
-        run: cdk deploy -c environment=prod --require-approval never
+        run: cdk deploy -c environment=prod -c version=${{ env.VERSION }} --require-approval never
+
+      - name: Create Git Tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag v${{ env.VERSION }}
+          git push origin v${{ env.VERSION }}
