@@ -54,7 +54,10 @@ namespace ChatAppInfra.Constructs
                     "dynamodb:*",
                     "appsync:*",
                     "cognito-idp:*",
-                    "rekognition:*"
+                    "rekognition:*",
+                    "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath"
                 },
                 Resources = new[] { "*" }
             }));
