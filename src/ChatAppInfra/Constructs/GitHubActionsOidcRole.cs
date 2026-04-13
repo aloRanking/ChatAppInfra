@@ -47,7 +47,11 @@ namespace ChatAppInfra.Constructs
             {
                 Effect = Effect.ALLOW,
                 Actions = new[]
+
                 {
+                    "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath",
                     "cloudformation:*",
                     "s3:*",
                     "lambda:*",
@@ -55,22 +59,12 @@ namespace ChatAppInfra.Constructs
                     "appsync:*",
                     "cognito-idp:*",
                     "rekognition:*",
-                    "ssm:GetParameter",
-        "ssm:GetParameters",
-        "ssm:GetParametersByPath"
+                    
                 },
                 Resources = new[] { "*" }
             }));
 
-            Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
-    {
-        Effect = Effect.ALLOW,
-        Actions = new[] { "ssm:GetParameter" },
-        Resources = new[] 
-        { 
-            $"arn:aws:ssm:{Aws.REGION}:{Aws.ACCOUNT_ID}:parameter/cdk-bootstrap/*"
-        }
-    }));
+            
         }
     }
 }

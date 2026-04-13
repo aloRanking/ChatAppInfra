@@ -50,7 +50,15 @@ namespace ChatAppInfra
             var githubRole = new GitHubActionsOidcRole(this, "GitHubActions", "aloRanking/ChatAppInfra", EnvironmentName);
             
 
-           
+           githubRole.Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+    {
+        Effect = Effect.ALLOW,
+        Actions = new[] { "ssm:GetParameter" },
+        Resources = new[] 
+        { 
+            $"arn:aws:ssm:{Aws.REGION}:{Aws.ACCOUNT_ID}:parameter/cdk-bootstrap/*"
+        }
+    }));
 
 
 
