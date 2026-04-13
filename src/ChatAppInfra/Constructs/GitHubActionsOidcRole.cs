@@ -64,6 +64,29 @@ namespace ChatAppInfra.Constructs
                 Resources = new[] { "*" }
             }));
 
+            Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+    {
+        Effect = Effect.ALLOW,
+        Actions = new[] { "ssm:GetParameter" },
+        Resources = new[] 
+        { 
+            $"arn:aws:ssm:{Aws.REGION}:{Aws.ACCOUNT_ID}:parameter/cdk-bootstrap/*"
+        }
+    }));
+
+            Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+{
+    Effect = Effect.ALLOW,
+    Actions = new[]
+    {
+        "sts:AssumeRole"
+    },
+    Resources = new[]
+    {
+        $"arn:aws:iam::{Aws.ACCOUNT_ID}:role/cdk-*"
+    }
+}));
+
             
         }
     }
