@@ -63,18 +63,18 @@ namespace ChatAppInfra.Constructs
                 },
                 Resources = new[] { "*" }
             }));
-//             Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
-// {
-//     Effect = Effect.ALLOW,
-//     Actions = new[]
-//     {
-//         "sts:AssumeRole"
-//     },
-//     Resources = new[]
-//     {
-//         $"arn:aws:iam::{Aws.ACCOUNT_ID}:role/cdk-*"
-//     }
-// }));
+            Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
+{
+    Effect = Effect.ALLOW,
+    Actions = new[]
+    {
+        "sts:AssumeRole"
+    },
+    Resources = new[]
+    {
+        $"arn:aws:iam::{Aws.ACCOUNT_ID}:role/cdk-*"
+    }
+}));
 
             Role.AddToPolicy(new PolicyStatement(new PolicyStatementProps
     {
