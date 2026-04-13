@@ -48,6 +48,7 @@ namespace ChatAppInfra
 
 
             var githubRole = new GitHubActionsOidcRole(this, "GitHubActions", "aloRanking/ChatAppInfra", EnvironmentName);
+            
 
            
 
