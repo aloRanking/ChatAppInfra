@@ -14,6 +14,7 @@ using Amazon.CDK.AWS.SES.Actions;
 using Amazon.CDK.AWS.Events.Targets;
 using System.Collections.Generic;
 using Amazon.CDK.AWS.SecretsManager;
+using ChatAppInfra.Constructs;
 
 
 namespace ChatAppInfra
@@ -44,6 +45,11 @@ namespace ChatAppInfra
             Amazon.CDK.Tags.Of(this).Add("DeployedAt", deployedAt);
             Amazon.CDK.Tags.Of(this).Add("Project", "ChatApp");
             Amazon.CDK.Tags.Of(this).Add("Stack", id);
+
+
+            var githubRole = new GitHubActionsOidcRole(this, "GitHubActions", "aloRanking/ChatAppInfra", EnvironmentName);
+
+           
 
 
 
@@ -713,6 +719,12 @@ $util.toJson($items)
                 Value = mediaBucket.BucketName,
                 Description = "S3 bucket for media uploads"
             });
+
+            // Output role ARN
+        new CfnOutput(this, "GitHubRoleArn", new CfnOutputProps
+        {
+            Value = githubRole.Role.RoleArn
+        });
 
 
 
